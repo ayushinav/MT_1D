@@ -1,5 +1,3 @@
-include("utils.jl")
-
 """
 xrange= vector to be updated, of the same length as Δx
 Δx= interval to the left of the grid point. The first is 0, making it the same length as the number of elements.
@@ -87,13 +85,13 @@ function make_dz(ρ, h, ω, mzp; n= 16)
 end
 
 """
-`fem_1d_grid(ρ,h,ω, dz_p, max_z_p)`
+`fem_fwd1d(ρ, h, ω::Real, mzp; n= 16)`
 finite element response for 1D MT for resistivity distribution `ρ` with thickness `h` at a frequency `ω`, 
 `mz_p` is the multiplication factor for the maximum skin depth for the deepest extent of the model space,
 2`n`-1 grid points per layer will be constructed.
 returns a tuple of impedance at the surface `Z` and the number of node points used `nz`.
 """
-function fem_1d_grid(ρ, h, ω, mzp; n= 16)
+function fem_fwd1d(ρ, h, ω::Real, mzp; n= 16)
     max_depth= 500*sqrt(maximum(ρ)*2π/ω)*mzp;
 
     dz= make_dz(ρ, h, ω, mzp, n= n)
@@ -132,14 +130,14 @@ function fem_1d_grid(ρ, h, ω, mzp; n= 16)
 end
 
 """
-`fem_1d_grid(ρ,h,ω, dz_p, max_z_p)`
-finite element response for 1D MT for resistivity distribution `ρ` with thickness `h` at frequencies given by `ωs`, 
+`fem_fwd1d(ρ, h, ω::Real, mzp; n= 16)`
+finite element response for 1D MT for resistivity distribution `ρ` with thickness `h` at frequencies given by `ω`, 
 `mz_p` is the multiplication factor for the maximum skin depth for the deepest extent of the model space,
 2`n`-1 grid points per layer will be constructed.
 returns a tuple of impedances at the surface `Z` and the number of node points used `nz` for all the frequencies.
 """
-function fe_fwds1d(ρ,h,ωs, mzp; n= 16)
-    arr= [fem_1d_grid2(ρ,h,iω, mzp, n=n) for iω in ωs];
+function fem_fwd1d(ρ,h,ω::AbstractVector, mzp; n= 16)
+    arr= [fem_fwd1d(ρ,h,iω, mzp, n=n) for iω in ω];
     a1= [arr[i][1] for i in 1:length(arr)];
     nz= arr[1][2];
     return a1,nz;
